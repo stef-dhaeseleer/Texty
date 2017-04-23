@@ -7,6 +7,10 @@
 #include <termios.h>
 #include <unistd.h>
 
+/*** defines ***/
+
+#define CTRL_KEY(k) ((k) & 0x1f)    //Mirrors what the CTRL key does
+
 /*** data ***/
 
 struct termios orig_termios;    // Saving the original terminal attributes.
@@ -38,11 +42,10 @@ void enableRawMode() {
     raw.c_cc[VMIN] = 0;
     raw.c_cc[VTIME] = 1;
     
-    if (tcgetattr(STDIN_FILENO, &orig_termios) == -1) die("tcgetattr");
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
 }
 
 /*** init ***/
-
 int main() {
     enableRawMode();
     
@@ -56,7 +59,7 @@ int main() {
         } else {
             printf("%d ('%c')\r\n", c, c);
         }
-        if (c == 'q') break;
+        if (c == CTRL_KEY('q')) break;
     }
     return 0;
 }
